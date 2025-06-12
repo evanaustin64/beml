@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir -r requirements.txt && pip cache purge
 COPY src/ src/
 
 # Menyalin folder models yang berisi file model (.pkl, .h5, .joblib)
-COPY data/models/ data/models/
+COPY models/ models/
 
 # Menyalin file aplikasi utama (app.py)
 COPY app.py .
