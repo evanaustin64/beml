@@ -1,81 +1,61 @@
-# =========================================================
-# DOCKERFILE UNTUK APLIKASI PYTHON DENGAN DEPENDENSI ML
-# Python 3.12, Debian-based (slim)
-# =========================================================
+# Dockerfile untuk aplikasi Sign Language API (Railway/Production)
+# Menggunakan base image python:3.11-slim-buster untuk kompatibilitas yang lebih baik
+FROM python:3.11-slim-buster 
 
-# --- PILIH HANYA SATU BARIS 'FROM' BERIKUT INI DENGAN MENGHAPUS TANDA '#' ---
+# Environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=5000
+ENV FLASK_ENV=production
 
-# OPSI 1 (Direkomendasikan Pertama): Base image Python 3.12 slim
-# Ini menggunakan distribusi Debian terbaru (Bookworm) secara default untuk 3.12-slim
-FROM python:3.12-slim
+# Install system dependencies yang diperlukan oleh OpenCV (cv2)
+# libgl1-mesa-glx menyediakan libGL.so.1
+# libsm6 dan libxext6 juga sering dibutuhkan oleh OpenCV di lingkungan headless
+# libglib2.0-0 menyediakan libgthread-2.0.so.0
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    libgl1-mesa-glx \
+    libsm6 \
+    libxext6 \
+    libglib2.0-0 \
+    libfontconfig1 \  
+    libxrender1 && \  
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 
-# OPSI 2 (Alternatif jika OPSI 1 gagal): Base image Python 3.12 slim di atas Bookworm
-# Ini secara eksplisit menentukan distribusi Debian Bookworm
-# # FROM python:3.12-slim-bookworm
-
-# =========================================================
-
-# Instal dependensi sistem yang umum dibutuhkan oleh pustaka ML
-# seperti OpenCV, TensorFlow, dan untuk proses build (compilers, dll.).
-# Perintah ini menggunakan apt-get karena base image adalah Debian/Ubuntu.
-# ...
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    pkg-config \
-    libjpeg-dev \
-    zlib1g-dev \
-    libpng-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libtbbmalloc2 \
-    libtbb-dev \
-    libv4l-dev \
-    libgtk2.0-dev \
-    libatlas-base-dev \
-    gfortran \
-    python3-dev \
-    git \
-    cmake \
-    # Hapus cache apt setelah instalasi untuk mengurangi ukuran image
-    && rm -rf /var/lib/apt/lists/*
-
-# ---- Solusi Agresif untuk Masalah 'distutils' di Python 3.12 ----
-# Pastikan pip, setuptools, dan wheel di lingkungan GLOBAL sudah mutakhir
-# sebelum virtual environment dibuat atau paket lain diinstal.
-RUN pip install --no-input --upgrade pip setuptools wheel
-
-# Atur direktori kerja di dalam kontainer
+# Set work directory
 WORKDIR /app
 
-# Atur variabel lingkungan PATH untuk virtual environment
-# Ini memastikan executable dari venv diprioritaskan di PATH
-ENV NIXPACKS_PATH=/opt/venv/bin:$NIXPACKS_PATH
+# Upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
 
-# Buat virtual environment untuk mengisolasi dependensi proyek
-RUN python -m venv --copies /opt/venv
-
-# AKTIFKAN VIRTUAL ENVIRONMENT dan LAKUKAN UPGRADE LAGI DI DALAMNYA
-# Ini adalah lapisan pengaman tambahan untuk memastikan setuptools di dalam venv
-# juga mutakhir sebelum menginstal requirements.
-RUN . /opt/venv/bin/activate && \
-    pip install --upgrade pip setuptools wheel
-
-# Salin file requirements.txt ke dalam container.
-# Ini dilakukan sebelum salin kode aplikasi untuk memanfaatkan Docker layer caching.
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && pip cache purge
 
-# Sekarang, install semua dependensi Python yang tercantum di requirements.txt.
-# Karena pip/setuptools sudah di-upgrade, masalah distutils seharusnya teratasi.
-RUN . /opt/venv/bin/activate && \
-    pip install -r requirements.txt
+# Menyalin folder src (termasuk feature_extractor.py jika ada)
+COPY src/ src/
 
-# Salin sisa kode aplikasi dari host ke dalam container
-# Pastikan ini dilakukan setelah instalasi dependensi, sehingga perubahan kode
-# tidak memicu instalasi ulang dependensi jika requirements.txt tidak berubah.
-COPY . .
+# Menyalin folder models yang berisi file model (.pkl, .h5, .joblib)
+COPY data/models/ data/models/
 
-# Atur command yang akan dijalankan saat kontainer dimulai.
-# Sesuaikan dengan entry point utama aplikasi Backend Flask Anda.
-# Contoh: Jika file Flask Anda bernama app.py dan dijalankan langsung
-CMD ["python", "app.py"]
+# Menyalin file aplikasi utama (app.py)
+COPY app.py .
+
+# Tambahkan baris ini untuk debugging struktur file:
+RUN ls -R /app 
+
+# Create dummy directories (ini mungkin sudah tidak sepenuhnya diperlukan
+# jika folder data/models dan src/ sudah disalin, tapi tidak ada salahnya)
+RUN mkdir -p data/models src/data_preprocessing
+
+# Expose port
+EXPOSE $PORT
+
+# Simple health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:$PORT/api/health || exit 1
+
+# Start command - gunakan shell form
+CMD python3 app.py
