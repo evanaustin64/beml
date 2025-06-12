@@ -50,9 +50,10 @@ PORT = int(os.environ.get('PORT', 5000))
 
 # CORS configuration
 FRONTEND_URLS = [
-    'https://silent-sign.vercel.app',
-    'https://silent-signl-git-main-mark-alvins-projects-95223802.vercel.app',
-    'https://silent-signl-82ztgrwmy-mark-alvins-projects-95223802.vercel.app',
+    'https://silentdicoding.vercel.app',
+    'https://silentdicoding-fpc74hkgc-evans-projects-d43a2e39.vercel.app',
+    'https://silentdicoding-evans-projects-d43a2e39.vercel.app',
+    'https://silentdicoding-evanaustin64-evans-projects-d43a2e39.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
     'http://127.0.0.1:3000',
@@ -86,16 +87,14 @@ logger.info(f"CORS configured for domains: {CORS_ORIGINS}")
 def download_model_files():
     """Download all model files including TensorFlow models"""
     model_urls = {
-        "data/models/sign_language_model_bisindo_feature_names.pkl": "https://drive.google.com/uc?export=download&id=1mZuNshrTfJdeBcPZdDLFxsIiaGvm5zOV",
-        "data/models/sign_language_model_bisindo_sklearn.pkl": "https://drive.google.com/uc?export=download&id=1KiVbDoeEhi8e_ALg3MTjnSYcVJCcsnab",
-        "data/models/sign_language_model_bisindo_tensorflow_meta.pkl": "https://drive.google.com/uc?export=download&id=1UtvlHe0tMlQl0JxdrRtXAiHD9dfJ_r4u",
-        "data/models/sign_language_model_bisindo_tensorflow.h5": "https://drive.google.com/uc?export=download&id=16bs2DwGp5nOvlvutny7f-oBWLzi00Srd",
-        "data/models/sign_language_model_bisindo.pkl": "https://drive.google.com/uc?export=download&id=1GNqTOAWwoGRyd4n00zv17d4YfkByS0tA",
-        "data/models/sign_language_model_sibi_feature_names.pkl": "https://drive.google.com/uc?export=download&id=16XCooZ4DWpKGTy3yEVrGRkEamqpreIsa",
-        "data/models/sign_language_model_sibi_sklearn.pkl": "https://drive.google.com/uc?export=download&id=1r5fDK7blBHM-CXHWs3NjKy14RZ4B_DpG",
-        "data/models/sign_language_model_sibi_tensorflow_meta.pkl": "https://drive.google.com/uc?export=download&id=1ujlwbf5KZaeV3hdo8-u7jhRIRtX4MbtK",
-        "data/models/sign_language_model_sibi_tensorflow.h5": "https://drive.google.com/uc?export=download&id=1Zz55YonwMcWsR76CW1W5zBW6uzzuaZDh",
-        "data/models/sign_language_model_sibi.pkl": "https://drive.google.com/uc?export=download&id=1UGGPtCgiQzfdV4CdN3Cg2o3V0-BUlpZj"
+        "data/models/sign_language_model_bisindo_sklearn.pkl": "https://drive.google.com/file/d/1bnrvuB4LDgdnULu1Hl7EPeDHt1DFhrqO/view?usp=sharing",
+        "data/models/sign_language_model_bisindo_tensorflow_meta.pkl": "https://drive.google.com/file/d/1kgZELWluCxWCeIUctqg_LgCBF9zwfeh7/view?usp=sharing",
+        "data/models/sign_language_model_bisindo_tensorflow.h5": "https://drive.google.com/file/d/1-kiiHsSzAx3O0_nUUiNBwGabEwvDPoUY/view?usp=sharing",
+        "data/models/sign_language_model_bisindo.pkl": "https://drive.google.com/file/d/1lJ65XUtjBifPW4ZCfUygaoKMDM98j8QA/view?usp=sharing",
+        "data/models/sign_language_model_sibi_sklearn.pkl": "https://drive.google.com/file/d/1INb4pmCmWMJ4DCAwVt3Ygu6Aij1_kN73/view?usp=sharing",
+        "data/models/sign_language_model_sibi_tensorflow_meta.pkl": "https://drive.google.com/file/d/1w0kwwlJX_OtBljCafka6NcEUHGzw2EFs/view?usp=sharing",
+        "data/models/sign_language_model_sibi_tensorflow.h5": "https://drive.google.com/file/d/1Zb1bcRjkZGogAS3duiX6esDvLUdvFBtI/view?usp=sharing",
+        "data/models/sign_language_model_sibi.pkl": "https://drive.google.com/file/d/1AiFIznCxHjVICjWmmN0pMv_0kJrzbs3h/view?usp=sharing"
     }
 
     for local_path, url in model_urls.items():
